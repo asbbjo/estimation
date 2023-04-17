@@ -37,7 +37,7 @@ x = setosa[0]
 z = np.dot(W, x)
 g = sc.expit(z[0])
 print(x)
-print(z, g)
+
 
 def grad_w_MSE_k(gk, tk, xk):
     return np.multiply()
