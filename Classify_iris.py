@@ -1,25 +1,18 @@
 import numpy as np
 import scipy.special as sc
 
-setosa = []
-versicolor = []
-virginica = []
+# create data for the flowers
+data = np.loadtxt("Classification Iris/Iris_TTT4275/iris.data", delimiter=",", usecols=(0, 1, 2, 3))
 
-with open("Classification Iris/Iris_TTT4275/iris.data",'r') as reader:
-    lines = reader.readlines()
-    for el in lines:
-        line = el.split(',')
-        flower = line.pop(-1)
-        data = np.loadtxt(line)
-        data = data.tolist()
-        data.append(1)
-        if (flower == "Iris-setosa\n"):
-            setosa.append(data)
-        elif (flower == "Iris-versicolor\n"):
-            versicolor.append(data)
-        elif (flower == "Iris-virginica\n"):
-            virginica.append(data)
+setosa = data[0:50]
+versicolor = data[50:100]
+virginica = data[100:150]
 
+setosa = np.array([np.append(row, 1) for row in setosa])
+versicolor = np.array([np.append(row, 1) for row in versicolor])
+virginica = np.array([np.append(row, 1) for row in virginica])
+
+# create matrix W
 start_weigth_1 = 0.1
 start_weigth_2 = 0.2
 start_weigth_3 = 0.3
@@ -30,15 +23,20 @@ w2 = np.full(4, start_weigth_2)
 w3 = np.full(4, start_weigth_3)
 w0 = np.full(3, start_weigth_0)
 
-w = np.array([np.transpose(w1), np.transpose(w2), np.transpose(w3)])
+w = np.array([w1, w2, w3])
 W = np.insert(w, 4, w0, axis=1)
 
-x = setosa[0]
-z = np.dot(W, x)
-g = sc.expit(z[0])
-print(x)
+# train the classifier
+train_num = 30
+for i in range(train_num):
+    setosa_train = np.array([setosa[i]])
+    versicolor_train = np.array([versicolor[i]])
+    virginica_train = np.array([virginica[i]])
 
+    z_setosa = np.dot(W, setosa_train.T)
+    z_versicolor = np.dot(W, versicolor_train.T)
+    z_virginica = np.dot(W, virginica_train.T)
 
-def grad_w_MSE_k(gk, tk, xk):
-    return np.multiply()
-
+    g1 = sc.expit(z_setosa)
+    g2 = sc.expit(z_versicolor)
+    g3 = sc.expit(z_virginica)
