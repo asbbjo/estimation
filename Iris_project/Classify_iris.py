@@ -34,25 +34,20 @@ for i in range(train_num):
     versicolor_train = np.array([versicolor[i]])
     virginica_train = np.array([virginica[i]])
 
-    z_setosa = np.dot(W, setosa_train.T)
-    z_versicolor = np.dot(W, versicolor_train.T)
-    z_virginica = np.dot(W, virginica_train.T)
-
-    g1 = sc.expit(z_setosa)
-    g2 = sc.expit(z_versicolor)
-    g3 = sc.expit(z_virginica)
-
     #calculate Delta MSE
-    N = 100
+    N = 10
     setosa_target = [1,0,0]
     versicolor_target = [0,1,0]
     virginica_target = [0,0,1]
     alpha = 0.00001
     for k in range(N):
-        #loss function to minimize
-        loss1 = 0.5 * np.sum((g1 - setosa_target)**2)
-        loss2 = 0.5 * np.sum((g2 - versicolor_target)**2)
-        loss3 = 0.5 * np.sum((g3 - virginica_target)**2)
+        z_setosa = np.dot(W, setosa_train.T)
+        z_versicolor = np.dot(W, versicolor_train.T)
+        z_virginica = np.dot(W, virginica_train.T)
+
+        g1 = sc.expit(z_setosa)
+        g2 = sc.expit(z_versicolor)
+        g3 = sc.expit(z_virginica)
 
         #calculate and update the weights
         MSE1 = np.outer(np.sum(g1 - setosa_target) * g1 * np.sum(1 - g1), setosa_train.T)
@@ -61,6 +56,11 @@ for i in range(train_num):
         W = W - alpha*MSE2
         MSE3 = np.outer(np.sum(g1 - virginica_target) * g3 * np.sum(1 - g3), virginica_train.T)
         W = W - alpha*MSE3
+
+        #loss function to minimize
+        loss1 = 0.5 * np.sum((g1 - setosa_target)**2)
+        loss2 = 0.5 * np.sum((g2 - versicolor_target)**2)
+        loss3 = 0.5 * np.sum((g3 - virginica_target)**2)
 
 print(loss1, loss2, loss3)
 print(W)
@@ -80,4 +80,3 @@ for i in range(test_num):
     print(np.argmax(np.dot(W,virginica_test.T)))
 
     input()
-    
