@@ -80,3 +80,4 @@ for i in range(test_num):
     print(np.argmax(np.dot(W,virginica_test.T)))
 
     input()
+    
