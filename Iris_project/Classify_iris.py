@@ -1,82 +1,69 @@
 import numpy as np
 import scipy.special as sc
 
-# create data for the flowers
+# calculating the gradient of the matrix W times the MSE
+def grad_w_MSE_k(gk, tk, xk):
+    return np.dot(np.multiply(gk - tk, gk, 1 - gk), xk.T)
+
+# read data from the 3 different flowers
 data = np.loadtxt("Iris_project/Classification Iris/Iris_TTT4275/iris.data", delimiter=",", usecols=(0, 1, 2, 3))
 
 setosa = data[0:50]
 versicolor = data[50:100]
 virginica = data[100:150]
 
+# create vector x
 setosa = np.array([np.append(row, 1) for row in setosa])
 versicolor = np.array([np.append(row, 1) for row in versicolor])
 virginica = np.array([np.append(row, 1) for row in virginica])
 
 
-# create matrix W
-start_weigth_1 = 0.1
-start_weigth_2 = 0.2
-start_weigth_3 = 0.3
-start_weigth_0 = 0.4
+def get_next_weight_matrix(predicted_labels, labels, samples, previous_W, alpha=0.01):
+    num_features = len(samples[0]) - 1 # Subtract 1 because of the 1-fill
+    num_classes = 3
+    grad_g_MSE = predicted_labels - labels # dim (30,3)
+    grad_z_g = predicted_labels * (1 - predicted_labels) # dim (30,3)
 
-w1 = np.full(4, start_weigth_1)
-w2 = np.full(4, start_weigth_2)
-w3 = np.full(4, start_weigth_3)
-w0 = np.full(3, start_weigth_0)
+    grad_W_z = np.array([ np.reshape(sample, (1, num_features+1)) for sample in samples ])
 
-w = np.array([w1, w2, w3])
-W = np.insert(w, 4, w0, axis=1)
+    grad_W_MSE = np.sum( np.matmul(np.reshape(grad_g_MSE[k] * grad_z_g[k], (num_classes, 1)), grad_W_z[k]) for k in range(len(grad_g_MSE)) )
 
-# train the classifier
-train_num = 30
-for i in range(train_num):
-    setosa_train = np.array([setosa[i]])
-    versicolor_train = np.array([versicolor[i]])
-    virginica_train = np.array([virginica[i]])
+    next_W = previous_W - alpha * grad_W_MSE
 
-    #calculate Delta MSE
-    N = 10
-    setosa_target = [1,0,0]
-    versicolor_target = [0,1,0]
-    virginica_target = [0,0,1]
-    alpha = 0.00001
-    for k in range(N):
-        z_setosa = np.dot(W, setosa_train.T)
-        z_versicolor = np.dot(W, versicolor_train.T)
-        z_virginica = np.dot(W, virginica_train.T)
+    return next_W
 
-        g1 = sc.expit(z_setosa)
-        g2 = sc.expit(z_versicolor)
-        g3 = sc.expit(z_virginica)
 
-        #calculate and update the weights
-        MSE1 = np.outer(np.sum(g1 - setosa_target) * g1 * np.sum(1 - g1), setosa_train.T)
-        W = W - alpha*MSE1
-        MSE2 = np.outer(np.sum(g2 - versicolor_target) * g2 * np.sum(1 - g2), versicolor_train.T)
-        W = W - alpha*MSE2
-        MSE3 = np.outer(np.sum(g1 - virginica_target) * g3 * np.sum(1 - g3), virginica_train.T)
-        W = W - alpha*MSE3
+# read the data into a training and test set
+# training uses the first 30, testing the last 20
+training_num = 30 
+test_num = 20
 
-        #loss function to minimize
-        loss1 = 0.5 * np.sum((g1 - setosa_target)**2)
-        loss2 = 0.5 * np.sum((g2 - versicolor_target)**2)
-        loss3 = 0.5 * np.sum((g3 - virginica_target)**2)
+data_training = np.concatenate([setosa[:training_num], versicolor[:training_num], virginica[:training_num]])
+data_test = np.concatenate([setosa[-test_num:], versicolor[-test_num:], virginica[-test_num:]])
 
-print(loss1, loss2, loss3)
-print(W)
+# create a vector with the correct corresponding labels (1, 2, 3)
+t_training = [1]*training_num + [2]*training_num + [3]*training_num
+t_test = [1]*test_num + [2]*test_num + [3]*test_num
+
+
+np.random.seed(1)
+W = np.random.randn(3, 5)
+
+for i in range(3*training_num):
+
+    xk_training = np.array([data_training[i]]).T
+    zk_training = np.dot(W, xk_training)
+    gk_training = sc.expit(zk_training)
+
+    W = get_next_weight_matrix(gk_training,[1,2,3],xk_training,W)
 
 # test the classifier
-test_num = 20
-for i in range(test_num):
-    print('New iteration:')
+# xk: (5,1), zk: (3,1), gk: (3,1)
+for i in range(3*test_num):
 
-    setosa_test = np.array([setosa[train_num + i]])
-    print(np.argmax(np.dot(W,setosa_test.T)))
+    xk_test = np.array([data_test[i]]).T
+    zk_test = np.dot(W, xk_test)
+    gk_test = sc.expit(zk_test)
 
-    versicolor_test = np.array([versicolor[train_num + i]])
-    print(np.argmax(np.dot(W,versicolor_test.T)))
-
-    virginica_test = np.array([virginica[train_num + i]])
-    print(np.argmax(np.dot(W,virginica_test.T)))
-
-    input()
+    g_predicted_test = np.argmax(gk_test) + 1
+    print(gk_test,g_predicted_test, t_test[i])
