@@ -25,8 +25,11 @@ test_num = 20
 data_training = np.concatenate([setosa[:training_num], versicolor[:training_num], virginica[:training_num]])
 data_test = np.concatenate([setosa[-test_num:], versicolor[-test_num:], virginica[-test_num:]])
 
-# create a vector with the correct corresponding labels (1, 2, 3)
-t_training = [1]*training_num + [2]*training_num + [3]*training_num
+# create a vector with the correct corresponding labels 
+t_training = np.zeros((90, 3, 1))
+t_training[:30] = np.array([[1],[0],[0]])
+t_training[30:60] = np.array([[0],[1],[0]])
+t_training[60:] = np.array([[0],[0],[1]])
 t_test = [1]*test_num + [2]*test_num + [3]*test_num
 
 # create matrix W (3,5) 
@@ -34,15 +37,19 @@ t_test = [1]*test_num + [2]*test_num + [3]*test_num
 # [w2a w2b w2c w2d w20]
 # [w3a w3b w3c w3d w30]
 
-np.random.seed(1)
+np.random.seed(100)
+W = np.zeros((3, 5))
 W = np.random.randn(3, 5)
 
 # train the classifier
 # xk: (5,1), zk: (3,1), gk: (3,1)
 
-grad_W_MSE = 0
-alpha = 0.00001
-for j in range(1000):
+alpha = 0.001
+tolerance = 0.4
+condition = True
+num_iterations = 0
+while condition:
+    grad_W_MSE = 0  
     for i in range(3*training_num):
 
         xk_training = np.array([data_training[i]]).T
@@ -52,8 +59,10 @@ for j in range(1000):
         grad_W_MSE += grad_W_MSE_k(gk_training, t_training[i], xk_training)
         g_predicted_training = np.argmax(gk_training) + 1
 
+    condition = np.linalg.norm(grad_W_MSE) >= tolerance
+    num_iterations += 1
     W = W - alpha*grad_W_MSE
-
+    
 # test the classifier
 # xk: (5,1), zk: (3,1), gk: (3,1)
 for i in range(3*test_num):
@@ -65,3 +74,4 @@ for i in range(3*test_num):
     g_predicted_test = np.argmax(gk_test) + 1
     print(gk_test,g_predicted_test, t_test[i])
     
+print(num_iterations)
