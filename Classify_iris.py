@@ -2,7 +2,7 @@ import numpy as np
 import scipy.special as sc
 
 # calculating the gradient of the matrix W times the MSE
-def grad_w_MSE_k(gk, tk, xk):
+def grad_W_MSE_k(gk, tk, xk):
     return np.dot(np.multiply(gk - tk, gk, 1 - gk), xk.T)
 
 # read data from the 3 different flowers
@@ -40,21 +40,19 @@ W = np.random.randn(3, 5)
 # train the classifier
 # xk: (5,1), zk: (3,1), gk: (3,1)
 
-grad_w_MSE = 0
-alpha = 0.01
-for j in range(3):
+grad_W_MSE = 0
+alpha = 0.00001
+for j in range(1000):
     for i in range(3*training_num):
 
         xk_training = np.array([data_training[i]]).T
         zk_training = np.dot(W, xk_training)
         gk_training = sc.expit(zk_training)
 
-        grad_w_MSE += grad_w_MSE_k(gk_training, t_training[i], xk_training)
+        grad_W_MSE += grad_W_MSE_k(gk_training, t_training[i], xk_training)
         g_predicted_training = np.argmax(gk_training) + 1
 
-    W = W - alpha*grad_w_MSE
-    print(W)
-    print()
+    W = W - alpha*grad_W_MSE
 
 # test the classifier
 # xk: (5,1), zk: (3,1), gk: (3,1)
