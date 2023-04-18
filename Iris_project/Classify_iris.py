@@ -48,22 +48,22 @@ for i in range(train_num):
     versicolor_target = [0,1,0]
     virginica_target = [0,0,1]
     alpha = 0.00001
-    #loss function to minimize
-    loss1 = 0.5 * np.sum((g1 - setosa_target)**2)
-    loss2 = 0.5 * np.sum((g2 - versicolor_target)**2)
-    loss3 = 0.5 * np.sum((g3 - virginica_target)**2)
+    for k in range(N):
+        #loss function to minimize
+        loss1 = 0.5 * np.sum((g1 - setosa_target)**2)
+        loss2 = 0.5 * np.sum((g2 - versicolor_target)**2)
+        loss3 = 0.5 * np.sum((g3 - virginica_target)**2)
 
-    #calculate and update the weights
-    MSE1 = np.outer(np.sum(g1 - setosa_target) * g1 * np.sum(1 - g1), setosa_train.T)
-    W = W - alpha*MSE1
-    MSE2 = np.outer(np.sum(g2 - versicolor_target) * g2 * np.sum(1 - g2), versicolor_train.T)
-    W = W - alpha*MSE2
-    MSE3 = np.outer(np.sum(g1 - virginica_target) * g3 * np.sum(1 - g3), virginica_train.T)
-    W = W - alpha*MSE3
+        #calculate and update the weights
+        MSE1 = np.outer(np.sum(g1 - setosa_target) * g1 * np.sum(1 - g1), setosa_train.T)
+        W = W - alpha*MSE1
+        MSE2 = np.outer(np.sum(g2 - versicolor_target) * g2 * np.sum(1 - g2), versicolor_train.T)
+        W = W - alpha*MSE2
+        MSE3 = np.outer(np.sum(g1 - virginica_target) * g3 * np.sum(1 - g3), virginica_train.T)
+        W = W - alpha*MSE3
 
 print(loss1, loss2, loss3)
 print(W)
-input()
 
 # test the classifier
 test_num = 20
