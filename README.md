@@ -7,5 +7,5 @@ data set:
    4. petal width in cm
 
 future improvement of the code:
-  1. run everything from a user-frendly main() function
+  1. run everything from a user-friendly main() function
   2. choose batch size during training (calculation of grad_W_MSE)
