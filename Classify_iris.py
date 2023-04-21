@@ -2,7 +2,10 @@ import numpy as np
 import scipy.special as sc
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
+
 np.random.seed(100)
+training_num = 30
+test_num = 20
 
 ##########----------                    ----------##########
 ##########---------- DEFINING FUNCTIONS ----------##########
@@ -25,7 +28,7 @@ def make_x_data(setosa: np.ndarray, versicolor: np.ndarray, virginica: np.ndarra
     create the x vector from the compendium by adding 1 at the end
     default: deletes no elements
 
-    when given a delete_index (int) it will delete that element (while also appending 1) (used for task 2)
+    when given a delete_index (int) it will delete that element (while also appending 1) (USED FOR TASK 2)
     """
     setosa_x = np.array([np.append(np.delete(row, delete_index), 1) for row in setosa])
     versicolor_x = np.array([np.append(np.delete(row, delete_index), 1) for row in versicolor])
@@ -102,6 +105,8 @@ def grad_W_MSE_k(gk, tk, xk):
 def test_classifier(W, dataset: np.ndarray, num: int):
     """
     test the classifier
+    dataset: training or test
+    num: training_num or test_num
 
     returns a list of the predicted values
     """
@@ -118,6 +123,8 @@ def test_classifier(W, dataset: np.ndarray, num: int):
 def calculate_confusion_matrix(g_predicted: list, training_num= 30, test_num= 20):
     """
     calculate the confusion matrix
+
+    only needs a list of predicted values
 
     returns a confusion matrix and a normalized matrix (in %) 
     """
@@ -149,6 +156,7 @@ def error_rate(confusion_matrix):
 def print_results(cm: np.ndarray, cm_norm: np.ndarray, string: str):
     """
     print confusion matrix, normalized confusion matrix and error rate
+    string: training or test
     """
     print('---', string.upper(),' SET:')
     print('Confusion matrix:\n', cm, '\n\n', cm_norm)
@@ -157,7 +165,75 @@ def print_results(cm: np.ndarray, cm_norm: np.ndarray, string: str):
 
 ##########---------- FOR TASK 2 ----------##########
 
+def make_feature_data(data: np.ndarray):
+    """
+    returns a feature matrix:
 
+    [sepal_length, sepal_width, petal_length, petal_width]
+
+    where each of the features is a list
+    """
+    sepal_length = [element[0] for element in data]
+    sepal_width  = [element[1] for element in data]
+    petal_length = [element[2] for element in data]
+    petal_width  = [element[3] for element in data]
+    data_vector = [sepal_length, sepal_width, petal_length, petal_width]
+    return data_vector
+
+def plot_histogram(feature_data_matrix: np.ndarray, normalized=False, num_bins=10, opacity=0.5):
+    """
+    plot histogram
+
+    default: not normalized
+    """
+    for i in range(len(feature_data_matrix)):
+        plt.subplot(2, 2, i+1)
+        plt.hist(feature_data_matrix[i][0:50], bins=num_bins, alpha=0.5, color='red', label='Setosa')
+        plt.hist(feature_data_matrix[i][50:100], bins=num_bins, alpha=0.5, color='green', label='Versicolor')
+        plt.hist(feature_data_matrix[i][100:150], bins=num_bins, alpha=0.5, color='blue', label='Virginica')
+        if (normalized):
+            plt.axis([0, 8, 0, 30])
+        if (i == 0):
+            plt.xlabel('Sepal length [cm]')
+        elif (i == 1):
+            plt.xlabel('Sepal width [cm]')
+        elif (i == 2):
+            plt.xlabel('Petal length [cm]')
+        elif (i == 3):
+            plt.xlabel('Petal width [cm]')
+        plt.ylabel('Number of samples')
+        plt.suptitle('Histogram for all features and classes')
+        plt.legend()
+    plt.show()
+
+def remove_features():
+    """
+    removes 1 of the features in increasing order
+
+    prints the results
+    """
+    x3_setosa, x3_versicolor, x3_virginica = make_x_data(setosa=setosa, versicolor=versicolor, virginica=virginica, delete_index=0)
+    for i in range(4):
+        print('----- Using ', str(4-i), ' of the features -----')
+        x3_training, x3_test = make_training_and_test_data(x3_setosa, x3_versicolor, x3_virginica, data_set=1)
+        W3 = train_classifier(alpha=0.001, tolerance=0.4, dataset=x3_training, num_cols_W=4-i, training_labels=t_labels)
+        g3_pred_training = test_classifier(W=W3, dataset=x3_training, num=training_num)
+        g3_pred_test = test_classifier(W=W3, dataset=x3_test, num=test_num)
+        cm3_training, cm3_norm_training = calculate_confusion_matrix(g3_pred_training)
+        cm3_test, cm3_norm_test = calculate_confusion_matrix(g3_pred_training)
+        print_results(cm=cm3_training, cm_norm=cm3_norm_training, string="training")
+        print_results(cm=cm3_test, cm_norm=cm3_norm_test, string="test")
+        x3_setosa, x3_versicolor, x3_virginica = delete_column(matrix=x3_setosa, delete_index=0), delete_column(matrix=x3_versicolor, delete_index=0), delete_column(matrix=x3_virginica, delete_index=0)
+
+
+def delete_column(matrix: np.ndarray, delete_index: int):
+    """
+    delete the element of delete_index for every list inside the larger list
+
+    returns the matrix
+    """
+    return np.array([np.delete(row, delete_index) for row in matrix])
+    
 
 ##########----------                    ----------##########
 ##########----------   RUNNING TASK 1   ----------##########
@@ -168,8 +244,8 @@ x_setosa, x_versicolor, x_virginica = make_x_data(setosa, versicolor, virginica)
 training_data, test_data = make_training_and_test_data(x_setosa, x_versicolor, x_virginica, data_set=1)
 t_labels = make_labels()
 W_matrix = train_classifier(alpha=0.001, tolerance=0.4, dataset=training_data, num_cols_W=5, training_labels=t_labels)
-g_pred_training = test_classifier(W=W_matrix, dataset=training_data, num=30)
-g_pred_test = test_classifier(W=W_matrix, dataset=test_data, num=20)
+g_pred_training = test_classifier(W=W_matrix, dataset=training_data, num=training_num)
+g_pred_test = test_classifier(W=W_matrix, dataset=test_data, num=test_num)
 cm_training, cm_norm_training = calculate_confusion_matrix(g_predicted=g_pred_training)
 cm_test, cm_norm_test = calculate_confusion_matrix(g_predicted=g_pred_test)
 print_results(cm=cm_training, cm_norm=cm_norm_training, string="training")
@@ -179,30 +255,7 @@ print_results(cm=cm_test, cm_norm=cm_norm_test, string="test")
 ##########----------   RUNNING TASK 2   ----------##########
 ##########----------                    ----------##########
 
-# make histograms for each feture and class
-
-sepal_length = [element[0] for element in data]
-sepal_width  = [element[1] for element in data]
-petal_length = [element[2] for element in data]
-petal_width  = [element[3] for element in data]
-data_vector = [sepal_length, sepal_width, petal_length, petal_width]
-
-for i in range(len(data_vector)):
-    plt.subplot(2, 2, i+1)
-    plt.hist(data_vector[i][0:50], bins=10, alpha=0.5, color='red', label='Setosa')
-    plt.hist(data_vector[i][50:100], bins=10, alpha=0.5, color='green', label='Versicolor')
-    plt.hist(data_vector[i][100:150], bins=10, alpha=0.5, color='blue', label='Virginica')
-    #plt.axis([0, 8, 0, 30])
-    if (i == 0):
-        plt.xlabel('Sepal length [cm]')
-    elif (i == 1):
-        plt.xlabel('Sepal width [cm]')
-    elif (i == 2):
-        plt.xlabel('Petal length [cm]')
-    elif (i == 3):
-        plt.xlabel('Petal width [cm]')
-    plt.ylabel('Number of samples')
-    plt.suptitle('Histogram for all features and classes')
-    plt.legend()
-plt.show()
+feature_matrix = make_feature_data(data)
+plot_histogram(feature_data_matrix=feature_matrix)
+remove_features()
 
