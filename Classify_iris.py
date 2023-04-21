@@ -19,12 +19,16 @@ versicolor = np.array([np.append(row, 1) for row in versicolor])
 virginica = np.array([np.append(row, 1) for row in virginica])
 
 # read the data into a training and test set
-# training uses the first 30, testing the last 20
 training_num = 30 
 test_num = 20
 
+# first round: training uses the first 30, testing the last 20
 data_training = np.concatenate([setosa[:training_num], versicolor[:training_num], virginica[:training_num]])
 data_test = np.concatenate([setosa[-test_num:], versicolor[-test_num:], virginica[-test_num:]])
+
+# second round: training uses the last 30, testing the first 20
+data_training = np.concatenate([setosa[-training_num:], versicolor[-training_num:], virginica[-training_num:]])
+data_test = np.concatenate([setosa[:test_num], versicolor[:test_num:], virginica[:test_num:]])
 
 # create a vector with the correct corresponding labels 
 t_training = np.zeros((90, 3, 1))
