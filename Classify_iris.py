@@ -10,27 +10,35 @@ np.random.seed(100)
 
 ##########---------- FOR TASK 1 ----------##########
 
-# read data from the 3 different flowers
 def read_data(filename: str):
+    """
+    read the data from the 3 flowers into setosa, versicolor, virginica and data (which contains all 3)
+    """
     data = np.loadtxt(filename, delimiter=",", usecols=(0, 1, 2, 3))
     setosa = data[0:50]
     versicolor = data[50:100]
     virginica = data[100:150]
     return setosa, versicolor, virginica, data
 
-# create data vector x
-# default: only appending 1 and not deleting any elements
 def make_x_data(setosa: np.ndarray, versicolor: np.ndarray, virginica: np.ndarray, delete_index=slice(0,0)):
+    """
+    create the x vector from the compendium by adding 1 at the end
+    default: deletes no elements
+
+    when given a delete_index (int) it will delete that element (while also appending 1) (used for task 2)
+    """
     setosa_x = np.array([np.append(np.delete(row, delete_index), 1) for row in setosa])
     versicolor_x = np.array([np.append(np.delete(row, delete_index), 1) for row in versicolor])
     virginica_x = np.array([np.append(np.delete(row, delete_index), 1) for row in virginica])
     return setosa_x, versicolor_x, virginica_x
 
-# make training and test data
-# choose data set
-# first round: training uses the first 30, testing the last 20
-# second round: training uses the last 30, testing the first 20
 def make_training_and_test_data(setosa_x: np.ndarray, versicolor_x: np.ndarray, virginica_x: np.ndarray, data_set: int, training_num = 30, test_num = 20):
+    """
+    make training and test data
+    choose data set
+    data_set == 1: training uses the first 30, testing the last 20
+    data_set == 2: training uses the last 30, testing the first 20
+    """
     if (data_set == 1):
         print('Using the data set of the FIRST round')
         data_training = np.concatenate([setosa_x[:training_num], versicolor_x[:training_num], virginica_x[:training_num]])
@@ -43,19 +51,27 @@ def make_training_and_test_data(setosa_x: np.ndarray, versicolor_x: np.ndarray, 
         ValueError
     return data_training, data_test
 
-def make_training_labels(training_num= 30):
+def make_labels(training_num= 30):
+    """
+    make corresponding labels
+
+    for 3 classes they are defined as [1 0 0]^T, [0 1 0]^T and [0 0 1]^T
+    """
     t_training = np.zeros((3*training_num, 3, 1))
     t_training[:training_num] = np.array([[1],[0],[0]])
     t_training[training_num:2*training_num] = np.array([[0],[1],[0]])
     t_training[2*training_num:] = np.array([[0],[0],[1]])
     return t_training
 
-# train the classifier. needs dataset on the form [[float float ... float 1]
-#                                                  [float float ... float 1]
-#                                                  ...
-#                                                  [float float ... float 1]]
-# where the columns of each row is given by num_cols and number of rows is given by num_training (global variable)
 def train_classifier(alpha: float, tolerance: float, dataset: np.ndarray, num_cols_W: int, training_labels: np.ndarray, training_num=30):
+    """
+    train the classifier
+
+    needs a data set of matrix form (rows= training_num, cols= num_cols_W) 
+
+    returns the matrix W
+ 
+    """
     W = np.zeros((3, num_cols_W))
     W = np.random.randn(3, num_cols_W)
     condition = True
@@ -77,12 +93,18 @@ def train_classifier(alpha: float, tolerance: float, dataset: np.ndarray, num_co
     print('Number of iterations to converge for the training set:', num_iterations)
     return W
 
-# calculating the gradient of the matrix W times the MSE
 def grad_W_MSE_k(gk, tk, xk):
+    """
+    calculate the gradient of the matrix W times the MSE
+    """
     return np.dot(np.multiply(gk - tk, gk, 1 - gk), xk.T)
 
-# test the classifier
 def test_classifier(W, dataset: np.ndarray, num: int):
+    """
+    test the classifier
+
+    returns a list of the predicted values
+    """
     g_predicted = []
     for i in range(3*num):
     
@@ -93,9 +115,12 @@ def test_classifier(W, dataset: np.ndarray, num: int):
         g_predicted.append(np.argmax(gk) + 1)
     return g_predicted
 
-# calculate the confusion matrix
 def calculate_confusion_matrix(g_predicted: list, training_num= 30, test_num= 20):
+    """
+    calculate the confusion matrix
 
+    returns a confusion matrix and a normalized matrix (in %) 
+    """
     if (len(g_predicted) == 3*training_num):
         g_true = [1]*training_num + [2]*training_num + [3]*training_num
     elif (len(g_predicted) == 3*test_num):
@@ -108,18 +133,23 @@ def calculate_confusion_matrix(g_predicted: list, training_num= 30, test_num= 20
     cm_norm = np.round(cm.astype('float') / cm.sum(axis=1)[:, np.newaxis], decimals=3)
     return cm, cm_norm
 
-# calculate error rate
 def error_rate(confusion_matrix):
-    # Calculate the total number of predictions
+    """
+    calculate error rate
+    """
+    # total number of predictions
     total_predictions = np.sum(confusion_matrix)
-    # Calculate the number of incorrect predictions
+    # number of incorrect predictions
     incorrect_predictions = total_predictions - np.trace(confusion_matrix)
-    # Calculate the error rate
+
     error_rate = incorrect_predictions / total_predictions
     error_rate = round(error_rate, 3)
     return error_rate
 
 def print_results(cm: np.ndarray, cm_norm: np.ndarray, string: str):
+    """
+    print confusion matrix, normalized confusion matrix and error rate
+    """
     print('---', string.upper(),' SET:')
     print('Confusion matrix:\n', cm, '\n\n', cm_norm)
     print('\nError rate:', error_rate(cm))
@@ -133,11 +163,10 @@ def print_results(cm: np.ndarray, cm_norm: np.ndarray, string: str):
 ##########----------   RUNNING TASK 1   ----------##########
 ##########----------                    ----------##########
 
-
 setosa, versicolor, virginica, data = read_data("Classification Iris/Iris_TTT4275/iris.data")
 x_setosa, x_versicolor, x_virginica = make_x_data(setosa, versicolor, virginica)
 training_data, test_data = make_training_and_test_data(x_setosa, x_versicolor, x_virginica, data_set=1)
-t_labels = make_training_labels()
+t_labels = make_labels()
 W_matrix = train_classifier(alpha=0.001, tolerance=0.4, dataset=training_data, num_cols_W=5, training_labels=t_labels)
 g_pred_training = test_classifier(W=W_matrix, dataset=training_data, num=30)
 g_pred_test = test_classifier(W=W_matrix, dataset=test_data, num=20)
@@ -145,7 +174,6 @@ cm_training, cm_norm_training = calculate_confusion_matrix(g_predicted=g_pred_tr
 cm_test, cm_norm_test = calculate_confusion_matrix(g_predicted=g_pred_test)
 print_results(cm=cm_training, cm_norm=cm_norm_training, string="training")
 print_results(cm=cm_test, cm_norm=cm_norm_test, string="test")
-
 
 ##########----------                    ----------##########
 ##########----------   RUNNING TASK 2   ----------##########
