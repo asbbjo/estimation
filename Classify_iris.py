@@ -76,7 +76,7 @@ def train_classifier(alpha: float, tolerance: float, dataset: np.ndarray, num_co
  
     """
     W = np.zeros((3, num_cols_W))
-    W = np.random.randn(3, num_cols_W)
+    #W = np.random.randn(3, num_cols_W)
     condition = True
     num_iterations = 0
     print('Using alpha=', alpha, ' and a tolerance=', tolerance, 'for the norm of grad_W_MSE')
@@ -216,11 +216,11 @@ def remove_features():
     for i in range(4):
         print('----- Using ', str(4-i), ' of the features -----')
         x3_training, x3_test = make_training_and_test_data(x3_setosa, x3_versicolor, x3_virginica, data_set=1)
-        W3 = train_classifier(alpha=0.001, tolerance=0.4, dataset=x3_training, num_cols_W=4-i, training_labels=t_labels)
+        W3 = train_classifier(alpha=0.001, tolerance=0.3, dataset=x3_training, num_cols_W=4-i, training_labels=t_labels)
         g3_pred_training = test_classifier(W=W3, dataset=x3_training, num=training_num)
         g3_pred_test = test_classifier(W=W3, dataset=x3_test, num=test_num)
         cm3_training, cm3_norm_training = calculate_confusion_matrix(g3_pred_training)
-        cm3_test, cm3_norm_test = calculate_confusion_matrix(g3_pred_training)
+        cm3_test, cm3_norm_test = calculate_confusion_matrix(g3_pred_test)
         print_results(cm=cm3_training, cm_norm=cm3_norm_training, string="training")
         print_results(cm=cm3_test, cm_norm=cm3_norm_test, string="test")
         x3_setosa, x3_versicolor, x3_virginica = delete_column(matrix=x3_setosa, delete_index=0), delete_column(matrix=x3_versicolor, delete_index=0), delete_column(matrix=x3_virginica, delete_index=0)
@@ -243,7 +243,7 @@ setosa, versicolor, virginica, data = read_data("Classification Iris/Iris_TTT427
 x_setosa, x_versicolor, x_virginica = make_x_data(setosa, versicolor, virginica)
 training_data, test_data = make_training_and_test_data(x_setosa, x_versicolor, x_virginica, data_set=1)
 t_labels = make_labels()
-W_matrix = train_classifier(alpha=0.001, tolerance=0.4, dataset=training_data, num_cols_W=5, training_labels=t_labels)
+W_matrix = train_classifier(alpha=0.001, tolerance=0.3, dataset=training_data, num_cols_W=5, training_labels=t_labels)
 g_pred_training = test_classifier(W=W_matrix, dataset=training_data, num=training_num)
 g_pred_test = test_classifier(W=W_matrix, dataset=test_data, num=test_num)
 cm_training, cm_norm_training = calculate_confusion_matrix(g_predicted=g_pred_training)
