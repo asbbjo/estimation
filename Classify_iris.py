@@ -212,11 +212,11 @@ def remove_features():
 
     prints the results
     """
-    x3_setosa, x3_versicolor, x3_virginica = make_x_data(setosa=setosa, versicolor=versicolor, virginica=virginica, delete_index=0)
+    x3_setosa, x3_versicolor, x3_virginica = make_x_data(setosa=setosa, versicolor=versicolor, virginica=virginica)
     for i in range(4):
         print('----- Using ', str(4-i), ' of the features -----')
         x3_training, x3_test = make_training_and_test_data(x3_setosa, x3_versicolor, x3_virginica, data_set=1)
-        W3 = train_classifier(alpha=0.001, tolerance=0.3, dataset=x3_training, num_cols_W=4-i, training_labels=t_labels)
+        W3 = train_classifier(alpha=0.001, tolerance=0.3, dataset=x3_training, num_cols_W=5-i, training_labels=t_labels)
         g3_pred_training = test_classifier(W=W3, dataset=x3_training, num=training_num)
         g3_pred_test = test_classifier(W=W3, dataset=x3_test, num=test_num)
         cm3_training, cm3_norm_training = calculate_confusion_matrix(g3_pred_training)
