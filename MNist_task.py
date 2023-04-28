@@ -219,28 +219,12 @@ Start of the code. Uncomment and change i) train_number and ii) test_number
 
 """
 
+''' ~90min and 25% error '''
 #cm, error = classify_NN(train_images, train_labels, test_images, test_labels, 60000, 10000) 
+
+''' 5m 40s and 5.7% error '''
 #cm, error = clustering_NN(train_images, train_labels, test_images, test_labels, 60000, 10000) 
+
+''' 6m 40s and 6.4% error '''
 #cm, error = clustering_kNN(train_images, train_labels, test_images, test_labels, 60000, 10000)
 print(cm, error)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
