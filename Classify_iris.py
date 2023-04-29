@@ -3,10 +3,6 @@ import scipy.special as sc
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 
-np.random.seed(100)
-training_num = 30
-test_num = 20
-
 ##########----------                    ----------##########
 ##########---------- DEFINING FUNCTIONS ----------##########
 ##########----------                    ----------##########
@@ -203,7 +199,7 @@ def plot_histogram(feature_data_matrix: np.ndarray, normalized=False, num_bins=1
         plt.legend()
     plt.show()
 
-def remove_features():
+def remove_features(data_set):
     """
     removes 1 of the features in increasing order
 
@@ -212,7 +208,7 @@ def remove_features():
     x3_setosa, x3_versicolor, x3_virginica = make_x_data(setosa=setosa, versicolor=versicolor, virginica=virginica)
     for i in range(4):
         print('----- Using ', str(4-i), ' of the features -----')
-        x3_training, x3_test = make_training_and_test_data(x3_setosa, x3_versicolor, x3_virginica, data_set=1)
+        x3_training, x3_test = make_training_and_test_data(x3_setosa, x3_versicolor, x3_virginica, data_set)
         W3 = train_classifier(alpha=0.001, tolerance=0.3, dataset=x3_training, num_cols_W=5-i, training_labels=t_labels)
         g3_pred_training = test_classifier(W=W3, dataset=x3_training, num=training_num)
         g3_pred_test = test_classifier(W=W3, dataset=x3_test, num=test_num)
@@ -226,33 +222,65 @@ def remove_features():
 def delete_column(matrix: np.ndarray, delete_index: int):
     """
     delete the element of delete_index for every list inside the larger list
-
     returns the matrix
     """
     return np.array([np.delete(row, delete_index) for row in matrix])
-    
+
+def print_text(text):
+    print()
+    print('----------' + text + '----------')
+    print()
+
+# variables to change:
+###################################################################################
+###################################################################################
+alpha = 0.001
+tolerance = 0.3    
+###################################################################################
+###################################################################################
+string = 'You can change the values for alpha and the tolerance of how much the weight matrix changes, in line 241 and 242.'
+string += '\nStop the program to change the values, or press any key to continue the program with default values.'
+print('##########---------- ----------##########')
+print('Program started')
+input(string)
 
 ##########----------                    ----------##########
 ##########----------   RUNNING TASK 1   ----------##########
 ##########----------                    ----------##########
 
-setosa, versicolor, virginica, data = read_data("Classification Iris/Iris_TTT4275/iris.data")
-x_setosa, x_versicolor, x_virginica = make_x_data(setosa, versicolor, virginica)
-training_data, test_data = make_training_and_test_data(x_setosa, x_versicolor, x_virginica, data_set=1)
-t_labels = make_labels()
-W_matrix = train_classifier(alpha=0.001, tolerance=0.3, dataset=training_data, num_cols_W=5, training_labels=t_labels)
-g_pred_training = test_classifier(W=W_matrix, dataset=training_data, num=training_num)
-g_pred_test = test_classifier(W=W_matrix, dataset=test_data, num=test_num)
-cm_training, cm_norm_training = calculate_confusion_matrix(g_predicted=g_pred_training)
-cm_test, cm_norm_test = calculate_confusion_matrix(g_predicted=g_pred_test)
-print_results(cm=cm_training, cm_norm=cm_norm_training, string="training")
-print_results(cm=cm_test, cm_norm=cm_norm_test, string="test")
+
+training_num = 30
+test_num = 20
+
+data_set_to_use = 1
+for i in range(2):
+    # read and preprepare data 
+    setosa, versicolor, virginica, data = read_data("Classification Iris/Iris_TTT4275/iris.data")
+    x_setosa, x_versicolor, x_virginica = make_x_data(setosa, versicolor, virginica)
+    training_data, test_data = make_training_and_test_data(x_setosa, x_versicolor, x_virginica, data_set_to_use)
+    t_labels = make_labels()
+
+    # training and testing classifier
+    W_matrix = train_classifier(alpha, tolerance, training_data, num_cols_W=5, training_labels=t_labels)
+    g_pred_training = test_classifier(W=W_matrix, dataset=training_data, num=training_num)
+    g_pred_test = test_classifier(W=W_matrix, dataset=test_data, num=test_num)
+
+    # calculating confusion matrix and error rate
+    cm_training, cm_norm_training = calculate_confusion_matrix(g_predicted=g_pred_training)
+    cm_test, cm_norm_test = calculate_confusion_matrix(g_predicted=g_pred_test)
+    print_results(cm=cm_training, cm_norm=cm_norm_training, string="training")
+    print_results(cm=cm_test, cm_norm=cm_norm_test, string="test")
+    
+    data_set_to_use += 1
+    print_text('Changing data set')
 
 ##########----------                    ----------##########
 ##########----------   RUNNING TASK 2   ----------##########
 ##########----------                    ----------##########
+input('Press any key to continue to task 2.')
+data_set_to_use = 1
 
 feature_matrix = make_feature_data(data)
-plot_histogram(feature_data_matrix=feature_matrix)
-remove_features()
-
+plot_histogram(feature_matrix)
+print_text('Removing features')
+remove_features(data_set_to_use)
