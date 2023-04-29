@@ -69,7 +69,6 @@ def train_classifier(alpha: float, tolerance: float, dataset: np.ndarray, num_co
  
     """
     W = np.zeros((3, num_cols_W))
-    #W = np.random.randn(3, num_cols_W)
     condition = True
     num_iterations = 0
     print('Using alpha=', alpha, ' and a tolerance=', tolerance, 'for the norm of grad_W_MSE')
@@ -119,7 +118,7 @@ def calculate_confusion_matrix(g_predicted: list, training_num= 30, test_num= 20
 
     only needs a list of predicted values
 
-    returns a confusion matrix and a normalized matrix (in %) 
+    returns a confusion matrix and a normalized confusion matrix (in %) 
     """
     if (len(g_predicted) == 3*training_num):
         g_true = [1]*training_num + [2]*training_num + [3]*training_num
@@ -137,9 +136,7 @@ def error_rate(confusion_matrix):
     """
     calculate error rate
     """
-    # total number of predictions
     total_predictions = np.sum(confusion_matrix)
-    # number of incorrect predictions
     incorrect_predictions = total_predictions - np.trace(confusion_matrix)
 
     error_rate = incorrect_predictions / total_predictions
@@ -199,24 +196,28 @@ def plot_histogram(feature_data_matrix: np.ndarray, normalized=False, num_bins=1
         plt.legend()
     plt.show()
 
-def remove_features(data_set):
+def remove_features(data_set, alpha, tolerance):
     """
     removes 1 of the features in increasing order
 
     prints the results
     """
-    x3_setosa, x3_versicolor, x3_virginica = make_x_data(setosa=setosa, versicolor=versicolor, virginica=virginica)
+    xdata_setosa, xdata_versicolor, xdata_virginica = make_x_data(setosa, versicolor, virginica)
     for i in range(4):
         print('----- Using ', str(4-i), ' of the features -----')
-        x3_training, x3_test = make_training_and_test_data(x3_setosa, x3_versicolor, x3_virginica, data_set)
-        W3 = train_classifier(alpha=0.001, tolerance=0.3, dataset=x3_training, num_cols_W=5-i, training_labels=t_labels)
-        g3_pred_training = test_classifier(W=W3, dataset=x3_training, num=training_num)
-        g3_pred_test = test_classifier(W=W3, dataset=x3_test, num=test_num)
+
+        x3_training, x3_test = make_training_and_test_data(xdata_setosa, xdata_versicolor, xdata_virginica, data_set)
+        W3 = train_classifier(alpha, tolerance, x3_training, num_cols_W=5-i, training_labels=t_labels)
+
+        g3_pred_training = test_classifier(W3, x3_training, training_num)
+        g3_pred_test = test_classifier(W3, x3_test, test_num)
+
         cm3_training, cm3_norm_training = calculate_confusion_matrix(g3_pred_training)
         cm3_test, cm3_norm_test = calculate_confusion_matrix(g3_pred_test)
-        print_results(cm=cm3_training, cm_norm=cm3_norm_training, string="training")
-        print_results(cm=cm3_test, cm_norm=cm3_norm_test, string="test")
-        x3_setosa, x3_versicolor, x3_virginica = delete_column(matrix=x3_setosa, delete_index=0), delete_column(matrix=x3_versicolor, delete_index=0), delete_column(matrix=x3_virginica, delete_index=0)
+        print_results(cm3_training, cm3_norm_training, "training")
+        print_results(cm3_test, cm3_norm_test, "test")
+
+        xdata_setosa, xdata_versicolor, xdata_virginica = delete_column(xdata_setosa, delete_index=0), delete_column(xdata_versicolor, delete_index=0), delete_column(xdata_virginica, delete_index=0)
 
 
 def delete_column(matrix: np.ndarray, delete_index: int):
@@ -234,15 +235,16 @@ def print_text(text):
 # variables to change:
 ###################################################################################
 ###################################################################################
-alpha = 0.001
-tolerance = 0.3    
+alpha = 0.002
+tolerance = 0.5    
 ###################################################################################
 ###################################################################################
-string = 'You can change the values for alpha and the tolerance of how much the weight matrix changes, in line 241 and 242.'
+string = 'You can change the values for alpha and the tolerance of how much the norm of grad_W_MSE (change in W divided by alpha) can change when updating the weight matrix W, in line 238 and 239.'
 string += '\nStop the program to change the values, or press any key to continue the program with default values.'
 print('##########---------- ----------##########')
 print('Program started')
 input(string)
+print()
 
 ##########----------                    ----------##########
 ##########----------   RUNNING TASK 1   ----------##########
@@ -262,14 +264,14 @@ for i in range(2):
 
     # training and testing classifier
     W_matrix = train_classifier(alpha, tolerance, training_data, num_cols_W=5, training_labels=t_labels)
-    g_pred_training = test_classifier(W=W_matrix, dataset=training_data, num=training_num)
-    g_pred_test = test_classifier(W=W_matrix, dataset=test_data, num=test_num)
+    g_pred_training = test_classifier(W_matrix, training_data, training_num)
+    g_pred_test = test_classifier(W_matrix, test_data, test_num)
 
     # calculating confusion matrix and error rate
-    cm_training, cm_norm_training = calculate_confusion_matrix(g_predicted=g_pred_training)
-    cm_test, cm_norm_test = calculate_confusion_matrix(g_predicted=g_pred_test)
-    print_results(cm=cm_training, cm_norm=cm_norm_training, string="training")
-    print_results(cm=cm_test, cm_norm=cm_norm_test, string="test")
+    cm_training, cm_norm_training = calculate_confusion_matrix(g_pred_training)
+    cm_test, cm_norm_test = calculate_confusion_matrix(g_pred_test)
+    print_results(cm_training, cm_norm_training, "training")
+    print_results(cm_test, cm_norm_test, "test")
     
     data_set_to_use += 1
     print_text('Changing data set')
@@ -283,4 +285,4 @@ data_set_to_use = 1
 feature_matrix = make_feature_data(data)
 plot_histogram(feature_matrix)
 print_text('Removing features')
-remove_features(data_set_to_use)
+remove_features(data_set_to_use, alpha, tolerance)
