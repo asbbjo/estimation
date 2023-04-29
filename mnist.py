@@ -74,7 +74,7 @@ def clustering(training_images, training_labels, data_length, M=64):
     shapedImages = sortedImages.flatten().reshape(data_length,digit_matrix_num)
     start = 0
     end = 0
-    print('Prepare clustering for each of the ten numbers:')
+    print('Prepare clustering for each of the ten digits:')
     for i in range(number_of_digits):
         print(i)
         end += numCount[i]
@@ -87,8 +87,6 @@ def clustering(training_images, training_labels, data_length, M=64):
     final_cluster = all_clusters.flatten().reshape(digit_tot_clustering,digit_matrix_num)
     return final_cluster
     
-
-
 
 def error_rate(confusion_matrix):
     """
@@ -123,10 +121,10 @@ def classify_NN(train_images_data, train_labels_data, test_images_data, test_lab
     digit_matrix_num = 784          #28x28 pixels
 
     #prepare the data sets for desired lengths and dimetions
-    train_images_data = train_images_data[:train_image_number]
-    test_images_data = test_images_data[:test_image_number]
-    train_images_data = train_images_data.flatten().reshape(train_image_number,digit_matrix_num)
-    test_images_data = test_images_data.flatten().reshape(test_image_number,digit_matrix_num)
+    train_images_data = train_images_data[:train_image_number].astype('float32')
+    test_images_data = test_images_data[:test_image_number].astype('float32')
+    #train_images_data = train_images_data.flatten().reshape(train_image_number,digit_matrix_num)
+    #test_images_data = test_images_data.flatten().reshape(test_image_number,digit_matrix_num)
 
     #find the distances and predict the digits in the image
     predicted = []
@@ -157,7 +155,7 @@ def clustering_NN(train_images_data, train_labels_data, test_images_data, test_l
     
     #prepare the data sets for desired lengths and dimetions
     test_images_data = test_images_data[:test_image_number]
-    test_images_data = test_images_data.flatten().reshape(test_image_number,digit_matrix_num)
+    test_images_data_n = test_images_data.flatten().reshape(test_image_number,digit_matrix_num)
 
     #find the distances of the nearest neighbor and predict the digits in the image
     predicted = []
@@ -165,7 +163,7 @@ def clustering_NN(train_images_data, train_labels_data, test_images_data, test_l
         print(i)
         dist = []
         for j in range(digit_tot_clustering):
-            dist.append(np.linalg.norm(test_images_data[i]-clustered[j,:]))
+            dist.append(np.linalg.norm(test_images_data_n[i]-clustered[j,:]))
         
         predicted.append(int(np.argmin(dist)//64))
 
@@ -174,7 +172,6 @@ def clustering_NN(train_images_data, train_labels_data, test_images_data, test_l
     error = error_rate(cm)
 
     return cm, error
-
 
 
 def clustering_kNN(train_images_data, train_labels_data, test_images_data, test_labels_data, train_image_number, test_image_number, K=7):
@@ -189,7 +186,7 @@ def clustering_kNN(train_images_data, train_labels_data, test_images_data, test_
     
     #prepare the data sets for desired lengths and dimetions
     test_images_data = test_images_data[:test_image_number]
-    test_images_data = test_images_data.flatten().reshape(test_image_number,digit_matrix_num)
+    test_images_data_n = test_images_data.flatten().reshape(test_image_number,digit_matrix_num)
     
     #find the distances of the k nearest neighbors, find the mode and predict the digits in the image
     predicted = []
@@ -198,7 +195,7 @@ def clustering_kNN(train_images_data, train_labels_data, test_images_data, test_
         print(i)
         dist = []
         for j in range(digit_tot_clustering):
-            dist.append(np.linalg.norm(test_images_data[i]-clustered[j,:]))
+            dist.append(np.linalg.norm(test_images_data_n[i]-clustered[j,:]))
         for k in range(K):
             dist_matrix[i,k] = int(np.argmin(dist)//64)
             dist.pop(np.argmin(dist))
@@ -211,20 +208,13 @@ def clustering_kNN(train_images_data, train_labels_data, test_images_data, test_
     return cm, error
 
 
-
-
 """
 
 Start of the code. Uncomment and change i) train_number and ii) test_number
 
 """
 
-''' ~90min and 25% error '''
 #cm, error = classify_NN(train_images, train_labels, test_images, test_labels, 60000, 10000) 
-
-''' 5m 40s and 5.7% error '''
 #cm, error = clustering_NN(train_images, train_labels, test_images, test_labels, 60000, 10000) 
-
-''' 6m 40s and 6.4% error '''
 #cm, error = clustering_kNN(train_images, train_labels, test_images, test_labels, 60000, 10000)
 print(cm, error)
