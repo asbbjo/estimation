@@ -26,9 +26,6 @@ def read_data(filename: str):
 def make_x_data(setosa: np.ndarray, versicolor: np.ndarray, virginica: np.ndarray, delete_index=slice(0,0)):
     """
     create the x vector from the compendium by adding 1 at the end
-    default: deletes no elements
-
-    when given a delete_index (int) it will delete that element (while also appending 1) (USED FOR TASK 2)
     """
     setosa_x = np.array([np.append(np.delete(row, delete_index), 1) for row in setosa])
     versicolor_x = np.array([np.append(np.delete(row, delete_index), 1) for row in versicolor])
