@@ -19,13 +19,13 @@ def read_data(filename: str):
     virginica = data[100:150]
     return setosa, versicolor, virginica, data
 
-def make_x_data(setosa: np.ndarray, versicolor: np.ndarray, virginica: np.ndarray, delete_index=slice(0,0)):
+def make_x_data(setosa: np.ndarray, versicolor: np.ndarray, virginica: np.ndarray):
     """
     create the x vector from the compendium by adding 1 at the end
     """
-    setosa_x = np.array([np.append(np.delete(row, delete_index), 1) for row in setosa])
-    versicolor_x = np.array([np.append(np.delete(row, delete_index), 1) for row in versicolor])
-    virginica_x = np.array([np.append(np.delete(row, delete_index), 1) for row in virginica])
+    setosa_x = np.array([np.append(row, 1) for row in setosa])
+    versicolor_x = np.array([np.append(row, 1) for row in versicolor])
+    virginica_x = np.array([np.append(row, 1) for row in virginica])
     return setosa_x, versicolor_x, virginica_x
 
 def make_training_and_test_data(setosa_x: np.ndarray, versicolor_x: np.ndarray, virginica_x: np.ndarray, data_set: int, training_num = 30, test_num = 20):
@@ -217,7 +217,7 @@ def remove_features(data_set, alpha, tolerance):
         print_results(cm3_training, cm3_norm_training, "training")
         print_results(cm3_test, cm3_norm_test, "test")
 
-        xdata_setosa, xdata_versicolor, xdata_virginica = delete_column(xdata_setosa, delete_index=0), delete_column(xdata_versicolor, delete_index=0), delete_column(xdata_virginica, delete_index=0)
+        xdata_setosa, xdata_versicolor, xdata_virginica = delete_column(xdata_setosa, 0), delete_column(xdata_versicolor, 0), delete_column(xdata_virginica, 0)
 
 
 def delete_column(matrix: np.ndarray, delete_index: int):
@@ -239,6 +239,7 @@ alpha = 0.002
 tolerance = 0.5    
 ###################################################################################
 ###################################################################################
+
 string = 'You can change the values for alpha and the tolerance of how much the norm of grad_W_MSE (change in W divided by alpha) can change when updating the weight matrix W, in line 238 and 239.'
 string += '\nStop the program to change the values, or press any key to continue the program with default values.'
 print('##########---------- ----------##########')
